@@ -1,0 +1,4 @@
+*.pyc
+get_revs
+config.yaml
+service-account.json
