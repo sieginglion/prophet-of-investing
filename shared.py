@@ -39,7 +39,7 @@ def Float(x):
 
 def get_invests_and_ratio(market):
     first_step = (
-        gspread.service_account('service-account.json')
+        gspread.service_account('service_account.json')
         .open('First Step')
         .get_worksheet(0)
     )

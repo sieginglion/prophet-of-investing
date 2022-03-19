@@ -2,4 +2,4 @@
 .vscode
 get_revs
 config.yaml
-service-account.json
+service_account.json
