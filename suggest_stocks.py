@@ -1,6 +1,8 @@
 import time
-import numpy as np
 import traceback
+
+import numpy as np
+
 from shared import *
 
 n_qtr = 5 + (config.stock.box - 1)
@@ -31,34 +33,18 @@ def get_symbol_to_name_and_industry(top):
     }
 
 
-@cached
+# @cached
 def get_revs(symbol):
-    time.sleep(0.22)
+    alpha_keys = config.stock.alpha_keys
+    time.sleep(12 / len(alpha_keys) * 1.1)
     resp = r.get(
-        f'https://financialmodelingprep.com/api/v3/income-statement/{ symbol }?period=quarter&limit={ n_qtr }&apikey={ config.stock.fmp_key }'
+        f'https://www.alphavantage.co/query?function=INCOME_STATEMENT&symbol={ symbol }&apikey={ alpha_keys[0] }'
     )
-    revs = (
-        np.array(
-            [
-                income['grossProfit']
-                for income in sorted(resp.json(), key=lambda x: x['date'])
-            ]
-        )
-        if resp.status_code == 200
-        else []
-    )
-    if not (len(revs) == n_qtr and all(revs > 0)):
-        alpha_keys = config.stock.alpha_keys
-        time.sleep(12 / len(alpha_keys) * 1.1 - 0.22)
-        resp = r.get(
-            f'https://www.alphavantage.co/query?function=INCOME_STATEMENT&symbol={ symbol }&apikey={ alpha_keys[0] }'
-        )
-        alpha_keys.append(alpha_keys.pop(0))
-        incomes = sorted(
-            resp.json().get('quarterlyReports', []), key=lambda x: x['fiscalDateEnding']
-        )[-n_qtr:]
-        revs = np.array([Float(income['grossProfit']) for income in incomes])
-    return revs
+    alpha_keys.append(alpha_keys.pop(0))
+    incomes = sorted(
+        resp.json().get('quarterlyReports', []), key=lambda x: x['fiscalDateEnding']
+    )[-n_qtr:]
+    return np.array([Float(income['grossProfit']) for income in incomes])
 
 
 def calc_rev(revs):
@@ -94,9 +80,9 @@ if __name__ == '__main__':
         symbols = list(symbol_to_name_and_industry.keys())
         symbol_to_revs = {symbol: get_revs(symbol) for symbol in symbols}
         symbol_to_score = calc_symbol_to_score(symbol_to_revs)
-        worst, better = find_worst_and_better('Stock', symbol_to_score)
-        message = [worst]
-        for symbol in better:
+        invests, betters = get_invests_and_betters('Stock', symbol_to_score)
+        message = invests + ['']
+        for symbol in betters:
             name, industry = symbol_to_name_and_industry[symbol]
             message.append(f'{ symbol } { industry }')
         notify('\n'.join(message))

@@ -1,6 +1,8 @@
 import time
-import numpy as np
 import traceback
+
+import numpy as np
+
 from shared import *
 
 n_caps = config.crypto.box * 2
@@ -17,8 +19,7 @@ def get_caps(crypto):
     resp = r.get(
         f'https://api.coingecko.com/api/v3/coins/{ crypto["id"] }/market_chart?vs_currency=usd&days={ n_caps + 1 }&interval=daily'
     )
-    chart = resp.json()
-    return [cap[1] for cap in chart['market_caps'][-n_caps:]]
+    return [cap[1] for cap in resp.json()['market_caps'][-n_caps:]]
 
 
 def calc_momentum(caps):
@@ -42,7 +43,7 @@ def get_symbol_to_momentum():
 if __name__ == '__main__':
     try:
         symbol_to_momentum = get_symbol_to_momentum()
-        worst, better = find_worst_and_better('Crypto', symbol_to_momentum)
-        notify('\n'.join([worst] + better))
+        invests, betters = get_invests_and_betters('Crypto', symbol_to_momentum)
+        notify('\n'.join(invests + [''] + betters))
     except:
         notify(traceback.format_exc())

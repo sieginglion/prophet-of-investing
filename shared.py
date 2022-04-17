@@ -1,8 +1,9 @@
 import os
-import yaml
 import pickle
+
 import gspread
 import requests as r
+import yaml
 
 
 class DotDict(object):
@@ -21,11 +22,11 @@ def cached(func):
     else:
         cache = {}
 
-    def func_(*param):
-        if param not in cache:
-            cache[param] = func(*param)
+    def func_(*args):
+        if args not in cache:
+            cache[args] = func(*args)
             pickle.dump(cache, open(func.__name__, 'wb'))
-        return cache[param]
+        return cache[args]
 
     return func_
 
@@ -33,7 +34,7 @@ def cached(func):
 def Float(x):
     try:
         return float(x)
-    except:
+    except Exception:
         return 0
 
 
@@ -62,17 +63,21 @@ def filter_overvalued(market, symbols, ratio):
     return undervalued
 
 
-def find_worst_and_better(market, symbol_to_score):
-    invests, ratio = get_invests_and_ratio(market)
+def get_invests_and_betters(market, symbol_to_score):
     ranking_list = [
         symbol
         for symbol, _ in sorted(
             symbol_to_score.items(), key=lambda x: x[1], reverse=True
         )
     ]
-    worst_i = max(ranking_list.index(invest) for invest in invests)
-    better = [symbol for symbol in ranking_list[: worst_i + 1] if symbol not in invests]
-    return ranking_list[worst_i], filter_overvalued(market, better, ratio)
+    invests, ratio = get_invests_and_ratio(market)
+    invests = [symbol for symbol in ranking_list if symbol in invests]
+    worst_i = ranking_list.index(invests[-1])
+    betters = [
+        symbol for symbol in ranking_list[: worst_i + 1] if symbol not in invests
+    ]
+    # return invests, filter_overvalued(market, betters, ratio)
+    return invests, betters
 
 
 def notify(text):
