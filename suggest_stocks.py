@@ -1,5 +1,6 @@
 import time
 import traceback
+from collections import Counter
 
 import numpy as np
 
@@ -33,7 +34,7 @@ def get_symbol_to_name_and_industry(top):
     }
 
 
-# @cached
+@cached
 def get_revs(symbol):
     alpha_keys = config.stock.alpha_keys
     time.sleep(12 / len(alpha_keys) * 1.1)
@@ -81,10 +82,14 @@ if __name__ == '__main__':
         symbol_to_revs = {symbol: get_revs(symbol) for symbol in symbols}
         symbol_to_score = calc_symbol_to_score(symbol_to_revs)
         invests, betters = get_invests_and_betters('Stock', symbol_to_score)
-        message = invests + ['']
+        hot_industry = Counter(
+            symbol_to_name_and_industry[symbol][1] for symbol in betters
+        ).most_common(1)[0][0]
+        message = invests + [hot_industry]
         for symbol in betters:
             name, industry = symbol_to_name_and_industry[symbol]
-            message.append(f'{ symbol } { industry }')
+            if industry != hot_industry:
+                message.append(f'{ symbol } { industry }')
         notify('\n'.join(message))
     except:
         notify(traceback.format_exc())
