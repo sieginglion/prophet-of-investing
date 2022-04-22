@@ -36,16 +36,18 @@ def get_symbol_to_name_and_industry(top):
 
 @cached
 def get_revs(symbol):
-    alpha_keys = config.stock.alpha_keys
-    time.sleep(12 / len(alpha_keys) * 1.1)
+    time.sleep(0.22)
     resp = r.get(
-        f'https://www.alphavantage.co/query?function=INCOME_STATEMENT&symbol={ symbol }&apikey={ alpha_keys[0] }'
+        f'https://financialmodelingprep.com/api/v3/income-statement/{ symbol }?period=quarter&limit={ n_qtr }&apikey={ config.stock.fmp_key }'
     )
-    alpha_keys.append(alpha_keys.pop(0))
-    incomes = sorted(
-        resp.json().get('quarterlyReports', []), key=lambda x: x['fiscalDateEnding']
-    )[-n_qtr:]
-    return np.array([Float(income['grossProfit']) for income in incomes])
+    return np.array(
+        [
+            income['grossProfit']
+            for income in sorted(resp.json(), key=lambda x: x['date'])
+        ]
+        if resp.status_code == 200
+        else []
+    )
 
 
 def calc_rev(revs):

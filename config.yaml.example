@@ -6,6 +6,5 @@ stock:
     top: 500 # top N stocks by market cap
     box: 4 # moving average window size, unit: quarter
     fmp_key:
-    alpha_keys: []
 
 bot_token:
