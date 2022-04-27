@@ -48,7 +48,7 @@ def get_invests_and_ratio(market):
         row[0]
         for row in first_step.get({'Crypto': 'A11:A20', 'Stock': 'A35:A39'}[market])
     ]
-    ratio = first_step.get('K6', value_render_option='UNFORMATTED_VALUE')[0][0]
+    ratio = first_step.get('L6', value_render_option='UNFORMATTED_VALUE')[0][0]
     return invests, ratio
 
 
