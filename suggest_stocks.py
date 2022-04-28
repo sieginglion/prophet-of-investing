@@ -9,7 +9,7 @@ from shared import *
 n_qtr = 5 + (config.stock.box - 1)
 
 
-def get_symbol_to_name_and_industry(top):
+def get_symbol_to_name_and_industry():
     resp = r.post(
         f'https://scanner.tradingview.com/america/scan',
         json={
@@ -25,7 +25,7 @@ def get_symbol_to_name_and_industry(top):
             'options': {'lang': 'en_US'},
             'columns': ['name', 'description', 'industry'],
             'sort': {'sortBy': 'market_cap_basic', 'sortOrder': 'desc'},
-            'range': [0, top],
+            'range': [0, config.stock.top],
         },
     )
     return {
@@ -38,52 +38,41 @@ def get_symbol_to_name_and_industry(top):
 def get_revs(symbol):
     time.sleep(0.22)
     resp = r.get(
-        f'https://financialmodelingprep.com/api/v3/income-statement/{ symbol }?period=quarter&limit={ n_qtr }&apikey={ config.stock.fmp_key }'
+        f'https://financialmodelingprep.com/api/v3/income-statement/{ symbol }?period=quarter&limit={ n_qtr + 1 }&apikey={ config.stock.fmp_key }'
     )
-    return np.array(
-        [
-            income['grossProfit']
-            for income in sorted(resp.json(), key=lambda x: x['date'])
-        ]
+    incomes = (
+        sorted(resp.json(), key=lambda x: x['date'])[-n_qtr:]
         if resp.status_code == 200
         else []
     )
+    return np.array([income['grossProfit'] for income in incomes])
 
 
-def calc_rev(revs):
-    box = config.stock.box
-    return sum(revs[-box:]) / box
-
-
-def calc_growth(revs):
-    box = config.stock.box
-    revs = np.convolve(revs, np.full(box, 1 / box), 'valid')
-    return revs[-1] / revs[0]
-
-
-def calc_symbol_to_score(symbol_to_revs):
-    symbol_to_rev_and_growth = {}
-    for symbol, revs in symbol_to_revs.items():
+def get_symbol_to_revs(symbols):
+    symbol_to_revs = {}
+    for symbol in symbols:
+        revs = get_revs(symbol)
         if len(revs) == n_qtr and all(revs > 0):
-            symbol_to_rev_and_growth[symbol] = (calc_rev(revs), calc_growth(revs))
-    revs, growths = [], []
-    for rev, growth in symbol_to_rev_and_growth.values():
-        revs.append(rev)
-        growths.append(growth)
-    revs, growths = np.array(revs), np.array(growths)
-    return {
-        symbol: np.sum(revs <= rev) * np.sum(growths <= growth)
-        for symbol, (rev, growth) in symbol_to_rev_and_growth.items()
-    }
+            symbol_to_revs[symbol] = revs
+    return symbol_to_revs
+
+
+def calc_symbol_to_momentum(symbol_to_revs):
+    box = config.crypto.box
+    symbol_to_momentum = {}
+    for symbol, revs in symbol_to_revs.items():
+        revs = np.convolve(revs, np.full(box, 1 / box), 'valid')
+        symbol_to_momentum[symbol] = revs[-1] - revs[-5]
+    return symbol_to_momentum
 
 
 if __name__ == '__main__':
     try:
-        symbol_to_name_and_industry = get_symbol_to_name_and_industry(config.stock.top)
+        symbol_to_name_and_industry = get_symbol_to_name_and_industry()
         symbols = list(symbol_to_name_and_industry.keys())
-        symbol_to_revs = {symbol: get_revs(symbol) for symbol in symbols}
-        symbol_to_score = calc_symbol_to_score(symbol_to_revs)
-        invests, betters = get_invests_and_betters('Stock', symbol_to_score)
+        symbol_to_revs = get_symbol_to_revs(symbols)
+        symbol_to_momentum = calc_symbol_to_momentum(symbol_to_revs)
+        invests, betters = get_invests_and_betters('Stock', symbol_to_momentum)
         hot_industry = Counter(
             symbol_to_name_and_industry[symbol][1] for symbol in betters
         ).most_common(1)[0][0]
