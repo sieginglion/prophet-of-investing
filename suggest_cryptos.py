@@ -27,9 +27,11 @@ def get_caps(crypto):
 def get_symbol_to_caps():
     symbol_to_caps = {}
     for crypto in get_cryptos():
-        caps = get_caps(crypto)
-        if len(caps) == n_caps and all(caps > 0):
-            symbol_to_caps[crypto['symbol'].upper()] = caps
+        symbol = crypto['symbol'].upper()
+        if 'USD' not in symbol:
+            caps = get_caps(crypto)
+            if len(caps) == n_caps and all(caps > 0):
+                symbol_to_caps[symbol] = caps
     return symbol_to_caps
 
 
