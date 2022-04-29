@@ -58,7 +58,7 @@ def get_symbol_to_revs(symbols):
 
 
 def calc_symbol_to_momentum(symbol_to_revs):
-    box = config.crypto.box
+    box = config.stock.box
     symbol_to_momentum = {}
     for symbol, revs in symbol_to_revs.items():
         revs = np.convolve(revs, np.full(box, 1 / box), 'valid')
