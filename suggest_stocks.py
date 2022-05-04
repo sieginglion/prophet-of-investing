@@ -54,6 +54,8 @@ def get_symbol_to_revs(symbols):
         revs = get_revs(symbol)
         if len(revs) == n_qtr and all(revs > 0):
             symbol_to_revs[symbol] = revs
+        else:
+            print(symbol)
     return symbol_to_revs
 
 

@@ -1,10 +1,9 @@
 crypto:
     top: 100 # top N cryptos by market cap
-    box: 180 # moving average window size, unit: day
 
 stock:
     top: 500 # top N stocks by market cap
-    box: 4 # moving average window size, unit: quarter
+    box: 1 # moving average window size, unit: quarter
     fmp_key:
 
 bot_token:
