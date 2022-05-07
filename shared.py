@@ -12,30 +12,24 @@ class DotDict(object):
             setattr(self, k, DotDict(v) if isinstance(v, dict) else v)
 
 
-with open('config.yaml', 'r') as f:
-    config = DotDict(yaml.safe_load(f))
+config = DotDict(yaml.safe_load(open('config.yaml', 'r')))
 
 
 def cached(func):
-    if os.path.isfile(func.__name__):
-        cache = pickle.load(open(func.__name__, 'rb'))
-    else:
-        cache = {}
+    name = func.__name__
+    cache = (
+        pickle.load(open(f'{ name }.pkl', 'rb'))
+        if os.path.isfile(f'{ name }.pkl')
+        else {}
+    )
 
     def func_(*args):
         if args not in cache:
             cache[args] = func(*args)
-            pickle.dump(cache, open(func.__name__, 'wb'))
+            pickle.dump(cache, open(f'{ name }.pkl', 'wb'))
         return cache[args]
 
     return func_
-
-
-def Float(x):
-    try:
-        return float(x)
-    except Exception:
-        return 0
 
 
 def get_invests_and_ratio(market):
@@ -52,17 +46,6 @@ def get_invests_and_ratio(market):
     return invests, ratio
 
 
-def filter_overvalued(market, symbols, ratio):
-    undervalued = []
-    for symbol in symbols:
-        resp = r.get(
-            f'https://us-central1-generated-armor-274023.cloudfunctions.net/CalcTargetPrice?market={ market }&symbol={ symbol }&ratio={ ratio }'
-        )
-        if resp.status_code == 200 and resp.json()['undervalued']:
-            undervalued.append(symbol)
-    return undervalued
-
-
 def get_invests_and_betters(market, symbol_to_score):
     ranking_list = [
         symbol
@@ -76,7 +59,6 @@ def get_invests_and_betters(market, symbol_to_score):
     betters = [
         symbol for symbol in ranking_list[: worst_i + 1] if symbol not in invests
     ]
-    # return invests, filter_overvalued(market, betters, ratio)
     return invests, betters
 
 

@@ -1,6 +1,7 @@
 .vscode
 
+*.pkl
 *.pyc
+
 config.yaml
-get_revs
 service_account.json
