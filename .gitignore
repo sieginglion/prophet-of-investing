@@ -1,5 +1,6 @@
-*.pyc
 .vscode
-get_revs
+
+*.pyc
 config.yaml
+get_revs
 service_account.json
