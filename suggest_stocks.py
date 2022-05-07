@@ -34,6 +34,15 @@ def get_symbol_to_name_and_industry():
 
 
 @cached
+def over_usd(currency):
+    time.sleep(0.22)
+    resp = r.get(
+        f'https://financialmodelingprep.com/api/v3/quote/USD{ currency }?apikey={ config.stock.fmp_key }'
+    )
+    return resp.json()[0]['price']
+
+
+@cached
 def get_profits(symbol):
     time.sleep(0.22)
     resp = r.get(
@@ -44,7 +53,12 @@ def get_profits(symbol):
         if resp.status_code == 200
         else []
     )
-    return np.array([income['grossProfit'] for income in incomes])
+    return np.array(
+        [
+            income['grossProfit'] / over_usd(income['reportedCurrency'])
+            for income in incomes
+        ]
+    )
 
 
 def get_symbol_to_profits(symbols):
