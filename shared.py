@@ -32,18 +32,16 @@ def cached(func):
     return func_
 
 
-def get_invests_and_ratio(market):
+def get_invests(market):
     first_step = (
         gspread.service_account('service_account.json')
         .open('First Step')
         .get_worksheet(0)
     )
-    invests = [
+    return [
         row[0]
         for row in first_step.get({'Crypto': 'A7:A16', 'Stock': 'A31:A35'}[market])
     ]
-    ratio = first_step.get('F39', value_render_option='UNFORMATTED_VALUE')[0][0]
-    return invests, ratio
 
 
 def get_invests_and_betters(market, symbol_to_score):
@@ -53,7 +51,7 @@ def get_invests_and_betters(market, symbol_to_score):
             symbol_to_score.items(), key=lambda x: x[1], reverse=True
         )
     ]
-    invests, ratio = get_invests_and_ratio(market)
+    invests = get_invests(market)
     invests = [symbol for symbol in ranking_list if symbol in invests]
     worst_i = ranking_list.index(invests[-1])
     betters = [
