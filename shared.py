@@ -40,7 +40,7 @@ def get_invests(market):
     )
     return [
         row[0]
-        for row in first_step.get({'Crypto': 'A7:A16', 'Stock': 'A31:A35'}[market])
+        for row in first_step.get({'Crypto': 'A7:A7', 'Stock': 'A22:A26'}[market])
     ]
 
 
