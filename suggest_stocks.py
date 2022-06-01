@@ -6,7 +6,7 @@ import numpy as np
 
 from shared import *
 
-n_qtr = 5 + (config.stock.box - 1)
+n_qtr = 5 + (config.stock.window - 1)
 
 
 def get_symbol_to_name_and_industry():
@@ -73,10 +73,10 @@ def get_symbol_to_profits(symbols):
 
 
 def calc_symbol_to_momentum(symbol_to_profits):
-    box = config.stock.box
+    window = config.stock.window
     symbol_to_momentum = {}
     for symbol, profits in symbol_to_profits.items():
-        profits = np.convolve(profits, np.full(box, 1 / box), 'valid')
+        profits = np.convolve(profits, np.full(window, 1 / window), 'valid')
         symbol_to_momentum[symbol] = profits[-1] - profits[0]
     return symbol_to_momentum
 

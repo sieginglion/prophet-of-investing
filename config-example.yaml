@@ -1,9 +1,10 @@
 crypto:
     top: 100 # top N cryptos by market cap
+    window: 90 # accumulative gross profit window size, unit: day
 
 stock:
     top: 500 # top N stocks by market cap
-    box: 1 # moving average window size, unit: quarter
+    window: 1 # moving average window size, unit: quarter
     fmp_key:
 
 bot_token:
