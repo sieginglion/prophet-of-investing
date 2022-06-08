@@ -1,15 +1,27 @@
 import os
 import pickle
+from typing import Any
 
 import gspread
 import requests as r
 import yaml
 
 
-class DotDict(object):
-    def __init__(self, d):
+class DotDict(dict):
+    def __setattr__(self, k: str, v: Any) -> None:
+        return super().__setitem__(k, v)
+
+    def __getattr__(self, k: str) -> Any:
+        return super().__getitem__(k)
+
+    def __init__(self, d: dict = {}):
         for k, v in d.items():
-            setattr(self, k, DotDict(v) if isinstance(v, dict) else v)
+            self[k] = DotDict(v) if isinstance(v, dict) else v
+
+    def to_dict(self) -> dict:
+        return {
+            k: v.to_dict() if isinstance(v, DotDict) else v for k, v in self.items()
+        }
 
 
 config = DotDict(yaml.safe_load(open('config.yaml', 'r')))
@@ -40,7 +52,7 @@ def get_invests(market):
     )
     return [
         row[0]
-        for row in first_step.get({'Crypto': 'A7:A7', 'Stock': 'A22:A26'}[market])
+        for row in first_step.get({'Crypto': 'A7:A8', 'Stock': 'A23:A27'}[market])
     ]
 
 

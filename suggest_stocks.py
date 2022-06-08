@@ -6,6 +6,7 @@ import numpy as np
 
 from shared import *
 
+
 n_qtr = 5 + (config.stock.window - 1)
 
 
@@ -34,7 +35,7 @@ def get_symbol_to_name_and_industry():
 
 
 @cached
-def over_usd(currency):
+def usd_over_x(currency):
     time.sleep(0.22)
     resp = r.get(
         f'https://financialmodelingprep.com/api/v3/quote/USD{ currency }?apikey={ config.stock.fmp_key }'
@@ -55,7 +56,7 @@ def get_profits(symbol):
     )
     return np.array(
         [
-            income['grossProfit'] / over_usd(income['reportedCurrency'])
+            income['grossProfit'] / usd_over_x(income['reportedCurrency'])
             for income in incomes
         ]
     )
