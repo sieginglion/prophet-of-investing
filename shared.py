@@ -44,32 +44,26 @@ def cached(func):
     return func_
 
 
-def get_invests(market):
-    first_step = (
-        gspread.service_account('service_account.json')
-        .open('First Step')
-        .get_worksheet(0)
-    )
-    return [
-        row[0]
-        for row in first_step.get({'Crypto': 'A7:A8', 'Stock': 'A23:A27'}[market])
-    ]
-
-
-def get_invests_and_betters(market, symbol_to_score):
+def get_investments_and_betters(market, symbol_to_score):
     ranking_list = [
         symbol
         for symbol, _ in sorted(
             symbol_to_score.items(), key=lambda x: x[1], reverse=True
         )
     ]
-    invests = get_invests(market)
-    invests = [symbol for symbol in ranking_list if symbol in invests]
-    worst_i = ranking_list.index(invests[-1])
-    betters = [
-        symbol for symbol in ranking_list[: worst_i + 1] if symbol not in invests
+    investments = [
+        row[0]
+        for row in gspread.service_account('service_account.json')
+        .open('First Step')
+        .get_worksheet(0)
+        .get({'Crypto': 'A7:A9', 'Stock': 'A23:A27'}[market])
     ]
-    return invests, betters
+    investments = [symbol for symbol in ranking_list if symbol in investments]
+    worst_i = ranking_list.index(investments[-1])
+    betters = [
+        symbol for symbol in ranking_list[: worst_i + 1] if symbol not in investments
+    ]
+    return investments, betters
 
 
 def notify(text):

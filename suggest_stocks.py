@@ -88,11 +88,11 @@ if __name__ == '__main__':
         symbols = list(symbol_to_name_and_industry.keys())
         symbol_to_profits = get_symbol_to_profits(symbols)
         symbol_to_momentum = calc_symbol_to_momentum(symbol_to_profits)
-        invests, betters = get_invests_and_betters('Stock', symbol_to_momentum)
+        investments, betters = get_investments_and_betters('Stock', symbol_to_momentum)
         hottest = Counter(
             symbol_to_name_and_industry[symbol][1] for symbol in betters
         ).most_common(1)[0][0]
-        message = invests + [hottest]
+        message = investments + [hottest]
         for symbol in betters:
             name, industry = symbol_to_name_and_industry[symbol]
             if industry != hottest:
