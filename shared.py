@@ -56,7 +56,7 @@ def get_investments_and_betters(market, symbol_to_score):
         for row in gspread.service_account('service_account.json')
         .open('First Step')
         .get_worksheet(0)
-        .get({'Crypto': 'A7:A9', 'Stock': 'A23:A27'}[market])
+        .get({'Crypto': config.crypto.range, 'Stock': config.stock.range}[market])
     ]
     investments = [symbol for symbol in ranking_list if symbol in investments]
     worst_i = ranking_list.index(investments[-1])
