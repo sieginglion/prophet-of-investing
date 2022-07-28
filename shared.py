@@ -60,11 +60,7 @@ def get_investments_and_betters(market, symbol_to_score):
     ]
     investments = [symbol for symbol in ranking_list if symbol in investments]
     worst_i = ranking_list.index(investments[-1])
-    betters = [
-        symbol
-        for symbol in ranking_list[: round((worst_i + 1) * 1.1)]
-        if symbol not in investments
-    ]
+    betters = [symbol for symbol in ranking_list[:worst_i] if symbol not in investments]
     return investments, betters
 
 

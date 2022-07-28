@@ -5,8 +5,8 @@ crypto:
 
 stock:
     top: 500 # top N stocks by market cap
-    window: 1 # moving average window size, unit: quarter
-    fmp_key:
+    fmp_key: # https://site.financialmodelingprep.com/developer/docs/
+    window: 2 # moving average window size, unit: quarter
     range:
 
 bot_token:
