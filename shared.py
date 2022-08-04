@@ -59,8 +59,11 @@ def get_investments_and_betters(market, symbol_to_score):
         .get({'Crypto': config.crypto.range, 'Stock': config.stock.range}[market])
     ]
     investments = [symbol for symbol in ranking_list if symbol in investments]
-    worst_i = ranking_list.index(investments[-1])
-    betters = [symbol for symbol in ranking_list[:worst_i] if symbol not in investments]
+    betters = [
+        symbol
+        for symbol in ranking_list[: ranking_list.index(investments[-1])]
+        if symbol not in investments
+    ]
     return investments, betters
 
 
