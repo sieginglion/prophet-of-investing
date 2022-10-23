@@ -24,7 +24,7 @@ class DotDict(dict):
         }
 
 
-config = DotDict(yaml.safe_load(open('config.yaml', 'r')))
+config = DotDict(yaml.safe_load(open('config.yaml')))
 
 
 def cached(func):
@@ -44,7 +44,7 @@ def cached(func):
     return func_
 
 
-def get_investments_and_betters(market, symbol_to_score):
+def get_investments_and_suggestions(market, symbol_to_score):
     ranking_list = [
         symbol
         for symbol, _ in sorted(
@@ -59,16 +59,16 @@ def get_investments_and_betters(market, symbol_to_score):
         .get({'Crypto': config.crypto.range, 'Stock': config.stock.range}[market])
     ]
     investments = [symbol for symbol in ranking_list if symbol in investments]
-    betters = [
+    suggestions = [
         symbol
         for symbol in ranking_list[: ranking_list.index(investments[-1])]
         if symbol not in investments
     ]
-    return investments, betters
+    return investments, suggestions
 
 
-def notify(text):
+def message(text):
     r.post(
         f'https://api.telegram.org/bot{ config.bot_token }/sendMessage',
         json={'chat_id': 1075192674, 'text': text},
-    ).json()
+    )

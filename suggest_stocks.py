@@ -6,7 +6,7 @@ import numpy as np
 from shared import *
 
 
-n_qtr = 5 + (config.stock.window - 1)
+N_QTR = 5 + (config.stock.window - 1)
 
 
 def get_symbol_to_name_and_industry():
@@ -45,7 +45,7 @@ def get_usd_over_x(currency):
 @cached
 def get_profits(symbol):
     resp = r.get(
-        f'https://financialmodelingprep.com/api/v3/income-statement/{ symbol }?period=quarter&limit={ n_qtr + 1 }&apikey={ config.stock.fmp_key }'
+        f'https://financialmodelingprep.com/api/v3/income-statement/{ symbol }?period=quarter&limit={ N_QTR + 1 }&apikey={ config.stock.fmp_key }'
     )
     time.sleep(0.22)
     incomes = (
@@ -62,8 +62,8 @@ def get_profits(symbol):
 def get_symbol_to_profits(symbols):
     symbol_to_profits = {}
     for symbol in symbols:
-        profits = get_profits(symbol)[-n_qtr:]
-        if len(profits) == n_qtr and all(profits > 0):
+        profits = get_profits(symbol)[-N_QTR:]
+        if len(profits) == N_QTR and all(profits > 0):
             symbol_to_profits[symbol] = profits
         else:
             print(symbol)
@@ -79,15 +79,17 @@ def calc_symbol_to_momentum(symbol_to_profits):
     return symbol_to_momentum
 
 
-def gen_message(investments, betters):
+def gen_message(investments, suggestions):
     message = investments
-    hottest = Counter(
-        symbol_to_name_and_industry[symbol][1] for symbol in betters
-    ).most_common(1)[0][0]
-    message.append(hottest)
-    for symbol in betters:
+    hot, _ = zip(
+        *Counter(
+            symbol_to_name_and_industry[symbol][1] for symbol in suggestions
+        ).most_common(2)
+    )
+    message.extend(hot)
+    for symbol in suggestions:
         name, industry = symbol_to_name_and_industry[symbol]
-        if industry != hottest:
+        if industry not in hot:
             message.append(f'{ symbol }  { name }  { industry }')
     return '\n'.join(message)
 
@@ -97,5 +99,7 @@ if __name__ == '__main__':
     symbols = list(symbol_to_name_and_industry.keys())
     symbol_to_profits = get_symbol_to_profits(symbols)
     symbol_to_momentum = calc_symbol_to_momentum(symbol_to_profits)
-    investments, betters = get_investments_and_betters('Stock', symbol_to_momentum)
-    notify(gen_message(investments, betters))
+    investments, suggestions = get_investments_and_suggestions(
+        'Stock', symbol_to_momentum
+    )
+    message(gen_message(investments, suggestions))

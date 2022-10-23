@@ -55,9 +55,9 @@ if __name__ == '__main__':
         symbol_to_cap = get_symbol_to_cap()
         symbol_to_gross = get_symbol_to_gross()
         symbol_to_pg = calc_symbol_to_pg(symbol_to_cap, symbol_to_gross)
-        invests, betters = get_invests_and_betters(
+        invests, suggestions = get_invests_and_suggestions(
             'Crypto', {symbol: -pg for symbol, pg in symbol_to_pg.items()}
         )
-        notify('\n'.join(invests + [''] + betters))
+        message('\n'.join(invests + [''] + suggestions))
     except:
-        notify(traceback.format_exc())
+        message(traceback.format_exc())
