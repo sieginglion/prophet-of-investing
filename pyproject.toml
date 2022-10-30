@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "prophet-of-investing"
+version = "0.1.0"
+description = ""
+authors = ["sieginglion <sieginglion@gmail.com>"]
+readme = "README.md"
+packages = [{include = "prophet_of_investing"}]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+numpy = "^1.23.4"
+gspread = "^5.6.2"
+requests = "^2.28.1"
+pyyaml = "^6.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

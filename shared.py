@@ -53,7 +53,7 @@ def get_investments_and_suggestions(market, symbol_to_score):
     ]
     investments = [
         row[0]
-        for row in gspread.service_account('service_account.json')
+        for row in gspread.service_account('service-account.json')
         .open('First Step')
         .get_worksheet(0)
         .get({'Crypto': config.crypto.range, 'Stock': config.stock.range}[market])
